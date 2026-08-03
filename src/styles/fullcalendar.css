@@ -1,0 +1,177 @@
+.fc {
+  font-family: inherit;
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th,
+.fc-theme-standard .fc-scrollgrid {
+  border-color: #ece6e2;
+}
+
+.fc .fc-toolbar {
+  margin-bottom: 25px;
+}
+
+.fc .fc-toolbar-title {
+  font-size: 28px;
+  color: #3d3d3d;
+  font-weight: 600;
+}
+
+.fc .fc-button {
+  background: #c8a96a !important;
+  border: none !important;
+  color: white !important;
+  border-radius: 12px !important;
+  padding: 8px 16px !important;
+  text-transform: none !important;
+  box-shadow: none !important;
+}
+
+.fc .fc-button:hover {
+  background: #b89754 !important;
+}
+
+.fc .fc-button-active {
+  background: #9e7e45 !important;
+}
+
+.fc .fc-col-header-cell {
+  background: #faf8f6;
+  padding: 12px 0;
+}
+
+.fc .fc-col-header-cell-cushion {
+  color: #3d3d3d;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.fc .fc-daygrid-day-number,
+.fc .fc-timegrid-axis-cushion,
+.fc .fc-timegrid-slot-label-cushion {
+  color: #555;
+  text-decoration: none;
+}
+
+.fc .fc-event {
+  background: #c8a96a !important;
+  border: none !important;
+  border-radius: 10px !important;
+  padding: 0 !important;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.fc .fc-event-main {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.fc .fc-event-title {
+  font-weight: 500;
+}
+
+.fc .fc-day-today {
+  background: #f8f2e8 !important;
+}
+
+.fc .fc-scrollgrid {
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.fc .fc-view {
+  background: white;
+}
+
+/* Conteúdo da marcação */
+
+.calendar-event-compact {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 4px 6px;
+
+  overflow: hidden;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.calendar-event-compact-time {
+  flex-shrink: 0;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.calendar-event-compact-name {
+  min-width: 0;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Vista semanal */
+
+.fc-timeGridWeek-view .calendar-event-compact {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fc-timeGridWeek-view .calendar-event-compact-time {
+  font-size: 10px;
+}
+
+.fc-timeGridWeek-view .calendar-event-compact-name {
+  width: 100%;
+  font-size: 11px;
+}
+
+/* Vista diária */
+
+.fc-timeGridDay-view .calendar-event-compact {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+}
+
+.fc-timeGridDay-view .calendar-event-compact-time,
+.fc-timeGridDay-view .calendar-event-compact-name {
+  font-size: 13px;
+}
+
+/* Vista mensal */
+
+.fc-dayGridMonth-view .calendar-event-compact {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 5px;
+}
+
+.fc-dayGridMonth-view .calendar-event-compact-time,
+.fc-dayGridMonth-view .calendar-event-compact-name {
+  font-size: 10px;
+}
+
+/* Efeito ao passar o rato */
+
+.fc .fc-event:hover {
+  filter: brightness(0.95);
+  box-shadow: 0 5px 14px rgba(61, 61, 61, 0.18);
+  z-index: 10;
+}
