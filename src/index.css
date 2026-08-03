@@ -71,3 +71,13 @@ body {
 .react-calendar__month-view__days__day--weekend {
   color: #3D3D3D;
 }
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
