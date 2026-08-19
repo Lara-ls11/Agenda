@@ -278,11 +278,6 @@ function Settings() {
           <h1 className="title text-4xl text-[#3D3D3D]">
             Definições
           </h1>
-
-          <p className="text-gray-500 mt-2">
-            Configure o horário de trabalho e os
-            dias indisponíveis.
-          </p>
         </div>
 
         <button

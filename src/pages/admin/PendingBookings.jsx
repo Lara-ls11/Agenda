@@ -45,10 +45,6 @@ function PendingBookings() {
         <h1 className="title text-4xl text-[#3D3D3D]">
           Pedidos Pendentes
         </h1>
-
-        <p className="text-gray-500 mt-2">
-          Reveja os pedidos antes de os aceitar.
-        </p>
       </div>
 
       {loading && (

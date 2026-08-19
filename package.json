@@ -15,6 +15,7 @@
     "@fullcalendar/interaction": "^6.1.19",
     "@fullcalendar/react": "^6.1.19",
     "@fullcalendar/timegrid": "^6.1.19",
+    "@neondatabase/serverless": "^1.1.0",
     "@supabase/supabase-js": "^2.112.0",
     "@tailwindcss/vite": "^4.3.3",
     "lucide-react": "^1.28.0",

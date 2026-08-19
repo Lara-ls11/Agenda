@@ -133,10 +133,6 @@ function Dashboard() {
           <h1 className="title text-3xl sm:text-4xl text-[#3D3D3D] leading-tight">
             Olá, Mónica
           </h1>
-
-          <p className="text-sm sm:text-base text-gray-500 mt-2">
-            Aqui está o resumo da sua agenda.
-          </p>
         </div>
 
         <button
