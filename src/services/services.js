@@ -1,40 +1,64 @@
-import { supabase } from "../lib/supabase";
+async function handleResponse(response) {
+  const data = await response.json();
 
-export async function getServices() {
-  const { data, error } = await supabase
-    .from("services")
-    .select("*")
-    .eq("active", true)
-    .order("category")
-    .order("name");
-
-  if (error) throw error;
+  if (!response.ok) {
+    throw new Error(
+      data.message || "Ocorreu um erro."
+    );
+  }
 
   return data;
 }
 
-export async function createService(service) {
-  const { error } = await supabase
-    .from("services")
-    .insert(service);
+export async function getServices() {
+  const response = await fetch("/api/services");
 
-  if (error) throw error;
+  return handleResponse(response);
+}
+
+export async function createService(service) {
+  const response = await fetch("/api/services", {
+    method: "POST",
+
+    headers: {
+      "Content-Type": "application/json",
+    },
+
+    body: JSON.stringify(service),
+  });
+
+  return handleResponse(response);
 }
 
 export async function updateService(id, service) {
-  const { error } = await supabase
-    .from("services")
-    .update(service)
-    .eq("id", id);
+  const response = await fetch("/api/services", {
+    method: "PUT",
 
-  if (error) throw error;
+    headers: {
+      "Content-Type": "application/json",
+    },
+
+    body: JSON.stringify({
+      id,
+      ...service,
+    }),
+  });
+
+  return handleResponse(response);
 }
 
 export async function deleteService(id) {
-  const { error } = await supabase
-    .from("services")
-    .delete()
-    .eq("id", id);
+  const response = await fetch("/api/services", {
+    method: "DELETE",
 
-  if (error) throw error;
+    headers: {
+      "Content-Type": "application/json",
+    },
+
+    body: JSON.stringify({
+      id,
+    }),
+  });
+
+  return handleResponse(response);
 }
