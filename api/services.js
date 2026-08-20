@@ -1,90 +1,125 @@
 import { neon } from "@neondatabase/serverless";
 
-export default async function handler(req, res) {
-  const sql = neon(process.env.DATABASE_URL);
+export default {
+  async fetch(request) {
+    try {
+      const sql = neon(process.env.DATABASE_URL);
 
-  try {
-    // OBTER SERVIÇOS
-    if (req.method === "GET") {
-      const services = await sql`
-        SELECT *
-        FROM services
-        WHERE active = true
-        ORDER BY category, name
-      `;
+      // GET - obter serviços
+      if (request.method === "GET") {
+        const services = await sql`
+          SELECT *
+          FROM services
+          WHERE active = true
+          ORDER BY category, name
+        `;
 
-      return res.status(200).json(services);
-    }
+        return Response.json(services);
+      }
 
-    // CRIAR SERVIÇO
-    if (req.method === "POST") {
-      const { name, category, duration, active = true } = req.body;
+      // POST - criar serviço
+      if (request.method === "POST") {
+        const body = await request.json();
 
-      const [service] = await sql`
-        INSERT INTO services (
+        const {
           name,
           category,
           duration,
-          active
-        )
-        VALUES (
-          ${name},
-          ${category},
-          ${duration},
-          ${active}
-        )
-        RETURNING *
-      `;
+          active = true,
+        } = body;
 
-      return res.status(201).json(service);
-    }
+        const services = await sql`
+          INSERT INTO services (
+            name,
+            category,
+            duration,
+            active
+          )
+          VALUES (
+            ${name},
+            ${category},
+            ${duration},
+            ${active}
+          )
+          RETURNING *
+        `;
 
-    // EDITAR SERVIÇO
-    if (req.method === "PUT") {
-      const { id, name, category, duration, active = true } = req.body;
-
-      const [service] = await sql`
-        UPDATE services
-        SET
-          name = ${name},
-          category = ${category},
-          duration = ${duration},
-          active = ${active}
-        WHERE id = ${id}
-        RETURNING *
-      `;
-
-      if (!service) {
-        return res.status(404).json({
-          message: "Serviço não encontrado.",
+        return Response.json(services[0], {
+          status: 201,
         });
       }
 
-      return res.status(200).json(service);
+      // PUT - editar serviço
+      if (request.method === "PUT") {
+        const body = await request.json();
+
+        const {
+          id,
+          name,
+          category,
+          duration,
+          active = true,
+        } = body;
+
+        const services = await sql`
+          UPDATE services
+          SET
+            name = ${name},
+            category = ${category},
+            duration = ${duration},
+            active = ${active}
+          WHERE id = ${id}
+          RETURNING *
+        `;
+
+        if (services.length === 0) {
+          return Response.json(
+            {
+              message: "Serviço não encontrado.",
+            },
+            {
+              status: 404,
+            }
+          );
+        }
+
+        return Response.json(services[0]);
+      }
+
+      // DELETE - eliminar serviço
+      if (request.method === "DELETE") {
+        const body = await request.json();
+
+        await sql`
+          DELETE FROM services
+          WHERE id = ${body.id}
+        `;
+
+        return Response.json({
+          success: true,
+        });
+      }
+
+      return Response.json(
+        {
+          message: "Método não permitido.",
+        },
+        {
+          status: 405,
+        }
+      );
+    } catch (error) {
+      console.error("SERVICES API ERROR:", error);
+
+      return Response.json(
+        {
+          success: false,
+          message: error.message,
+        },
+        {
+          status: 500,
+        }
+      );
     }
-
-    // APAGAR SERVIÇO
-    if (req.method === "DELETE") {
-      const { id } = req.body;
-
-      await sql`
-        DELETE FROM services
-        WHERE id = ${id}
-      `;
-
-      return res.status(200).json({
-        success: true,
-      });
-    }
-
-    return res.status(405).json({
-      message: "Método não permitido.",
-    });
-  } catch (error) {
-    console.error("SERVICES API ERROR:", error);
-
-    return res.status(500).json({
-      message: error.message,
-    });
-  }
-}
+  },
+};
