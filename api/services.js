@@ -3,7 +3,7 @@ import { neon } from "@neondatabase/serverless";
 export default {
   async fetch(request) {
     try {
-      const sql = neon(process.env.DATABASE_URL);
+        const sql = neon(process.env.DATABASE_URL);
 
       // GET - obter serviços
       if (request.method === "GET") {

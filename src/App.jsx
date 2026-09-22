@@ -56,6 +56,7 @@ function App() {
         element={<Login />}
       />
 
+
       {/* Rotas protegidas */}
       <Route element={<ProtectedRoute />}>
         <Route element={<AdminLayout />}>

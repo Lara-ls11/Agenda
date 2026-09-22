@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 
 import logo from "../assets/logo.png";
-import { supabase } from "../lib/supabase";
+import { authClient } from "../lib/neonAuth";
 
 function AdminLayout() {
   const navigate = useNavigate();
@@ -15,9 +15,17 @@ function AdminLayout() {
 
   const [menuOpen, setMenuOpen] = useState(false);
 
+  /* ===========================
+     FECHAR MENU AO MUDAR PÁGINA
+  =========================== */
+
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
+
+  /* ===========================
+     BLOQUEAR SCROLL COM MENU ABERTO
+  =========================== */
 
   useEffect(() => {
     if (menuOpen) {
@@ -31,20 +39,43 @@ function AdminLayout() {
     };
   }, [menuOpen]);
 
-  async function logout() {
-    const { error } = await supabase.auth.signOut();
+  /* ===========================
+     FECHAR MENU
+  =========================== */
 
-    if (error) {
-      alert("Não foi possível terminar a sessão.");
-      return;
+  function closeMenu() {
+    if (
+      document.activeElement instanceof HTMLElement
+    ) {
+      document.activeElement.blur();
     }
+
+    setMenuOpen(false);
+  }
+
+  /* ===========================
+     LOGOUT
+  =========================== */
+
+  async function logout() {
+  try {
+    await authClient.signOut();
 
     setMenuOpen(false);
 
     navigate("/admin", {
       replace: true,
     });
+  } catch (error) {
+    console.error("Erro ao terminar sessão:", error);
+
+    alert("Não foi possível terminar a sessão.");
   }
+}
+
+  /* ===========================
+     CLASSES DOS LINKS
+  =========================== */
 
   function linkClass({ isActive }) {
     return [
@@ -54,6 +85,10 @@ function AdminLayout() {
         : "text-[#3D3D3D] hover:bg-[#FAF8F6]",
     ].join(" ");
   }
+
+  /* ===========================
+     NAVEGAÇÃO
+  =========================== */
 
   const navigation = (
     <nav className="space-y-2">
@@ -103,14 +138,21 @@ function AdminLayout() {
 
   return (
     <div className="min-h-screen bg-[#FAF8F6]">
-      {/* Cabeçalho */}
+      {/* ===========================
+          CABEÇALHO
+      =========================== */}
+
       <header className="sticky top-0 z-40 border-b border-[#ECE6E2] bg-white shadow-sm">
         <div className="mx-auto flex min-h-16 max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:py-4">
+
           <div className="flex min-w-0 items-center gap-3">
-            {/* Botão visível apenas no telemóvel/tablet */}
+
+            {/* Botão menu mobile */}
             <button
               type="button"
-              onClick={() => setMenuOpen(true)}
+              onClick={() =>
+                setMenuOpen(true)
+              }
               aria-label="Abrir menu"
               aria-expanded={menuOpen}
               className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-[#ECE6E2] bg-white text-[#3D3D3D] transition hover:bg-[#FAF8F6] lg:hidden"
@@ -139,7 +181,7 @@ function AdminLayout() {
             </div>
           </div>
 
-          {/* No telemóvel fica dentro do menu */}
+          {/* Logout desktop */}
           <button
             type="button"
             onClick={logout}
@@ -150,93 +192,93 @@ function AdminLayout() {
         </div>
       </header>
 
+      {/* ===========================
+          CONTEÚDO PRINCIPAL
+      =========================== */}
+
       <div className="mx-auto flex w-full max-w-7xl">
-        {/* Sidebar do computador */}
+
+        {/* Sidebar desktop */}
         <aside className="hidden min-h-[calc(100vh-81px)] w-64 flex-shrink-0 border-r border-[#ECE6E2] bg-white lg:block">
           <div className="sticky top-[81px] p-6">
             {navigation}
           </div>
         </aside>
 
-        {/* Conteúdo */}
+        {/* Página atual */}
         <section className="min-w-0 flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:p-8">
           <Outlet />
         </section>
       </div>
 
-      {/* Menu móvel */}
-      <div
-        className={`fixed inset-0 z-50 lg:hidden ${
-          menuOpen
-            ? "pointer-events-auto"
-            : "pointer-events-none"
-        }`}
-        aria-hidden={!menuOpen}
-      >
-        {/* Fundo escuro */}
-        <button
-          type="button"
-          onClick={() => setMenuOpen(false)}
-          aria-label="Fechar menu"
-          className={`absolute inset-0 bg-black/40 transition-opacity duration-200 ${
-            menuOpen
-              ? "opacity-100"
-              : "opacity-0"
-          }`}
-        />
+      {/* ===========================
+          MENU MOBILE
+      =========================== */}
 
-        {/* Painel lateral */}
-        <aside
-          className={`absolute left-0 top-0 flex h-full w-[82%] max-w-xs flex-col bg-white shadow-2xl transition-transform duration-200 ${
-            menuOpen
-              ? "translate-x-0"
-              : "-translate-x-full"
-          }`}
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-50 lg:hidden"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu de administração"
         >
-          <div className="flex items-center justify-between border-b border-[#ECE6E2] px-5 py-4">
-            <div className="flex min-w-0 items-center gap-3">
-              <img
-                src={logo}
-                alt="Mónica Lima"
-                className="h-11 w-11 flex-shrink-0 object-contain"
-              />
+          {/* Fundo */}
+          <button
+            type="button"
+            onClick={closeMenu}
+            aria-label="Fechar menu"
+            className="absolute inset-0 bg-black/40"
+          />
 
-              <div className="min-w-0">
-                <p className="title truncate text-xl text-[#3D3D3D]">
-                  Mónica Lima
-                </p>
+          {/* Painel */}
+          <aside className="absolute left-0 top-0 flex h-full w-[82%] max-w-xs flex-col bg-white shadow-2xl">
 
-                <p className="text-xs text-gray-500">
-                  Administração
-                </p>
+            <div className="flex items-center justify-between border-b border-[#ECE6E2] px-5 py-4">
+
+              <div className="flex min-w-0 items-center gap-3">
+                <img
+                  src={logo}
+                  alt="Mónica Lima"
+                  className="h-11 w-11 flex-shrink-0 object-contain"
+                />
+
+                <div className="min-w-0">
+                  <p className="title truncate text-xl text-[#3D3D3D]">
+                    Mónica Lima
+                  </p>
+
+                  <p className="text-xs text-gray-500">
+                    Administração
+                  </p>
+                </div>
               </div>
+
+              <button
+                type="button"
+                onClick={closeMenu}
+                aria-label="Fechar menu"
+                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-[#ECE6E2] text-2xl leading-none text-[#3D3D3D] transition hover:bg-[#FAF8F6]"
+              >
+                ×
+              </button>
             </div>
 
-            <button
-              type="button"
-              onClick={() => setMenuOpen(false)}
-              aria-label="Fechar menu"
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl border border-[#ECE6E2] text-2xl leading-none text-[#3D3D3D] transition hover:bg-[#FAF8F6]"
-            >
-              ×
-            </button>
-          </div>
+            <div className="flex-1 overflow-y-auto p-5">
+              {navigation}
+            </div>
 
-          <div className="flex-1 overflow-y-auto p-5">
-            {navigation}
-          </div>
-
-          <div className="border-t border-[#ECE6E2] p-5">
-            <button
-              type="button"
-              onClick={logout}
-              className="w-full rounded-xl border border-red-200 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-            >
-              Terminar sessão
-            </button>
-          </div>
-        </aside>
-      </div>
+            <div className="border-t border-[#ECE6E2] p-5">
+              <button
+                type="button"
+                onClick={logout}
+                className="w-full rounded-xl border border-red-200 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
+              >
+                Terminar sessão
+              </button>
+            </div>
+          </aside>
+        </div>
+      )}
     </div>
   );
 }

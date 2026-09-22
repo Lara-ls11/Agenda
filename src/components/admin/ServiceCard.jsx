@@ -4,38 +4,41 @@ function ServiceCard({
   onDelete,
 }) {
   return (
-    <div className="bg-white rounded-3xl shadow-sm p-6 flex justify-between items-center">
+    <div className="bg-white rounded-3xl border border-[#F0EBE6] shadow-sm p-5 sm:p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-      <div>
+        {/* Informação do serviço */}
+        <div className="min-w-0">
+          <h3 className="text-base sm:text-lg font-semibold text-[#3D3D3D]">
+            {service.name}
+          </h3>
 
-        <h3 className="text-lg font-semibold text-[#3D3D3D]">
-          {service.name}
-        </h3>
+          <p className="mt-1 text-sm text-gray-400">
+            {service.duration} minutos
+          </p>
+        </div>
 
-        <p className="text-gray-500">
-          {service.duration} minutos
-        </p>
+        {/* Ações */}
+        <div className="flex items-center gap-2 sm:flex-shrink-0">
 
+          <button
+            type="button"
+            onClick={onEdit}
+            className="rounded-xl bg-[#F7F2E9] px-4 py-2 text-sm font-medium text-[#9A7A3D] transition hover:bg-[#EFE5D3]"
+          >
+            Editar
+          </button>
+
+          <button
+            type="button"
+            onClick={onDelete}
+            className="rounded-xl bg-[#FFF3F3] px-4 py-2 text-sm font-medium text-[#C46B6B] transition hover:bg-[#FDE7E7]"
+          >
+            Eliminar
+          </button>
+
+        </div>
       </div>
-
-      <div className="flex gap-3">
-
-        <button
-          onClick={onEdit}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-2 rounded-xl"
-        >
-          Editar
-        </button>
-
-        <button
-          onClick={onDelete}
-          className="bg-red-500 hover:bg-red-600 text-white px-5 py-2 rounded-xl"
-        >
-          Eliminar
-        </button>
-
-      </div>
-
     </div>
   );
 }

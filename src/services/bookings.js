@@ -1,31 +1,29 @@
-import { supabase } from "../lib/supabase";
+async function handleResponse(
+  response
+) {
+  const data =
+    await response.json();
 
-const BOOKING_SELECT = `
-  *,
-  booking_services (
-    id,
-    service_id,
-    service_name,
-    duration
-  )
-`;
+  if (!response.ok) {
+    throw new Error(
+      data.message ||
+        "Ocorreu um erro."
+    );
+  }
+
+  return data;
+}
 
 /* ===========================
    LISTAR TODAS AS MARCAÇÕES
 =========================== */
 
 export async function getBookings() {
-  const { data, error } = await supabase
-    .from("bookings")
-    .select(BOOKING_SELECT)
-    .order("booking_date")
-    .order("booking_time");
+  const response = await fetch(
+    "/api/bookings?action=all"
+  );
 
-  if (error) {
-    throw error;
-  }
-
-  return data || [];
+  return handleResponse(response);
 }
 
 /* ===========================
@@ -33,19 +31,11 @@ export async function getBookings() {
 =========================== */
 
 export async function getPendingBookings() {
-  const { data, error } = await supabase
-    .from("bookings")
-    .select(BOOKING_SELECT)
-    .eq("status", "pending")
-    .order("created_at", {
-      ascending: true,
-    });
+  const response = await fetch(
+    "/api/bookings?action=pending"
+  );
 
-  if (error) {
-    throw error;
-  }
-
-  return data || [];
+  return handleResponse(response);
 }
 
 /* ===========================
@@ -53,79 +43,66 @@ export async function getPendingBookings() {
 =========================== */
 
 export async function getAcceptedBookings() {
-  const { data, error } = await supabase
-    .from("bookings")
-    .select(BOOKING_SELECT)
-    .eq("status", "accepted")
-    .order("booking_date")
-    .order("booking_time");
+  const response = await fetch(
+    "/api/bookings?action=accepted"
+  );
 
-  if (error) {
-    throw error;
-  }
-
-  return data || [];
+  return handleResponse(response);
 }
 
 /* ===========================
    OBTER UMA MARCAÇÃO
 =========================== */
 
-export async function getBooking(id) {
-  const { data, error } = await supabase
-    .from("bookings")
-    .select(BOOKING_SELECT)
-    .eq("id", Number(id))
-    .single();
+export async function getBooking(
+  id
+) {
+  const response = await fetch(
+    `/api/bookings?action=one&id=${encodeURIComponent(
+      id
+    )}`
+  );
 
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  return handleResponse(response);
 }
 
 /* ===========================
    CRIAR MARCAÇÃO
 =========================== */
 
-export async function createBooking(booking, services) {
-  const serviceIds = services.map((service) =>
-    Number(service.id)
-  );
+export async function createBooking(
+  booking,
+  services
+) {
+  const serviceIds =
+    services.map(
+      (service) =>
+        Number(service.id)
+    );
 
-  const { data, error } = await supabase.rpc(
-    "create_booking_request",
+  const response = await fetch(
+    "/api/bookings",
     {
-      p_client_name: booking.client_name,
-      p_phone: booking.phone,
-      p_email: booking.email || "",
-      p_notes: booking.notes || "",
-      p_booking_date: booking.booking_date,
-      p_booking_time: booking.booking_time,
-      p_service_ids: serviceIds,
+      method: "POST",
+
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+
+      body: JSON.stringify({
+        booking,
+        serviceIds,
+      }),
     }
   );
 
-  if (error) {
-    throw error;
-  }
-
-  return data;
+  return handleResponse(response);
 }
 
 /* ===========================
    VERIFICAR CONFLITOS
 =========================== */
-
-function timeToMinutes(time) {
-  const [hours, minutes] = time
-    .slice(0, 5)
-    .split(":")
-    .map(Number);
-
-  return hours * 60 + minutes;
-}
 
 export async function getBookingConflicts({
   bookingId,
@@ -133,42 +110,28 @@ export async function getBookingConflicts({
   bookingTime,
   totalDuration,
 }) {
-  const { data, error } = await supabase
-    .from("bookings")
-    .select(`
-      id,
-      client_name,
-      booking_date,
-      booking_time,
-      total_duration,
-      status
-    `)
-    .eq("booking_date", bookingDate)
-    .eq("status", "accepted")
-    .neq("id", Number(bookingId));
+  const params =
+    new URLSearchParams({
+      action: "conflicts",
 
-  if (error) {
-    throw error;
-  }
+      bookingId: String(
+        bookingId
+      ),
 
-  const newStart = timeToMinutes(bookingTime);
-  const newEnd =
-    newStart + Number(totalDuration);
+      bookingDate,
 
-  return (data || []).filter((booking) => {
-    const existingStart = timeToMinutes(
-      booking.booking_time
-    );
+      bookingTime,
 
-    const existingEnd =
-      existingStart +
-      Number(booking.total_duration);
+      totalDuration: String(
+        totalDuration
+      ),
+    });
 
-    return (
-      newStart < existingEnd &&
-      newEnd > existingStart
-    );
-  });
+  const response = await fetch(
+    `/api/bookings?${params.toString()}`
+  );
+
+  return handleResponse(response);
 }
 
 /* ===========================
@@ -180,55 +143,25 @@ export async function updateBooking(
   booking,
   services
 ) {
-  const bookingId = Number(id);
+  const response = await fetch(
+    "/api/bookings",
+    {
+      method: "PUT",
 
-  const { error: bookingError } = await supabase
-    .from("bookings")
-    .update({
-      client_name: booking.client_name,
-      phone: booking.phone,
-      email: booking.email || null,
-      notes: booking.notes || null,
-      booking_date: booking.booking_date,
-      booking_time: booking.booking_time,
-      total_duration: booking.total_duration,
-      status: booking.status,
-    })
-    .eq("id", bookingId);
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
 
-  if (bookingError) {
-    throw bookingError;
-  }
-
-  const { error: deleteServicesError } =
-    await supabase
-      .from("booking_services")
-      .delete()
-      .eq("booking_id", bookingId);
-
-  if (deleteServicesError) {
-    throw deleteServicesError;
-  }
-
-  const bookingServices = services.map(
-    (service) => ({
-      booking_id: bookingId,
-      service_id: Number(service.id),
-      service_name: service.name,
-      duration: Number(service.duration),
-    })
+      body: JSON.stringify({
+        id: Number(id),
+        booking,
+        services,
+      }),
+    }
   );
 
-  const { error: insertServicesError } =
-    await supabase
-      .from("booking_services")
-      .insert(bookingServices);
-
-  if (insertServicesError) {
-    throw insertServicesError;
-  }
-
-  return getBooking(bookingId);
+  return handleResponse(response);
 }
 
 /* ===========================
@@ -239,29 +172,49 @@ export async function updateBookingStatus(
   id,
   status
 ) {
-  const { error } = await supabase
-    .from("bookings")
-    .update({
-      status,
-    })
-    .eq("id", Number(id));
+  const response = await fetch(
+    "/api/bookings",
+    {
+      method: "PUT",
 
-  if (error) {
-    throw error;
-  }
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+
+      body: JSON.stringify({
+        action: "status",
+        id: Number(id),
+        status,
+      }),
+    }
+  );
+
+  return handleResponse(response);
 }
 
 /* ===========================
    ELIMINAR MARCAÇÃO
 =========================== */
 
-export async function deleteBooking(id) {
-  const { error } = await supabase
-    .from("bookings")
-    .delete()
-    .eq("id", Number(id));
+export async function deleteBooking(
+  id
+) {
+  const response = await fetch(
+    "/api/bookings",
+    {
+      method: "DELETE",
 
-  if (error) {
-    throw error;
-  }
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+
+      body: JSON.stringify({
+        id: Number(id),
+      }),
+    }
+  );
+
+  return handleResponse(response);
 }

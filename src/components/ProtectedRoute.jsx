@@ -1,34 +1,55 @@
 import { useEffect, useState } from "react";
-import { Navigate, Outlet } from "react-router-dom";
-import { supabase } from "../lib/supabase";
+import {
+  Navigate,
+  Outlet,
+} from "react-router-dom";
+
+import { authClient } from "../lib/neonAuth";
 
 function ProtectedRoute() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadSession() {
-      const {
-        data: { session: currentSession },
-      } = await supabase.auth.getSession();
+    let active = true;
 
-      setSession(currentSession);
-      setLoading(false);
+    async function loadSession() {
+      try {
+        const result =
+          await authClient.getSession();
+
+        console.log(
+          "NEON SESSION:",
+          result
+        );
+
+        if (!active) {
+          return;
+        }
+
+        setSession(
+          result?.data || null
+        );
+      } catch (error) {
+        console.error(
+          "Erro ao verificar sessão:",
+          error
+        );
+
+        if (active) {
+          setSession(null);
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
     }
 
     loadSession();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      (_event, currentSession) => {
-        setSession(currentSession);
-        setLoading(false);
-      }
-    );
-
     return () => {
-      subscription.unsubscribe();
+      active = false;
     };
   }, []);
 
@@ -42,8 +63,13 @@ function ProtectedRoute() {
     );
   }
 
-  if (!session) {
-    return <Navigate to="/admin" replace />;
+  if (!session?.user) {
+    return (
+      <Navigate
+        to="/admin"
+        replace
+      />
+    );
   }
 
   return <Outlet />;

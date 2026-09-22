@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:vercel": "dotenv -e .env.local -- vercel dev",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview"
@@ -15,8 +16,8 @@
     "@fullcalendar/interaction": "^6.1.19",
     "@fullcalendar/react": "^6.1.19",
     "@fullcalendar/timegrid": "^6.1.19",
+    "@neondatabase/neon-js": "^0.7.0-beta",
     "@neondatabase/serverless": "^1.1.0",
-    "@supabase/supabase-js": "^2.112.0",
     "@tailwindcss/vite": "^4.3.3",
     "lucide-react": "^1.28.0",
     "react": "^19.2.8",
@@ -29,7 +30,9 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
+    "dotenv-cli": "^11.0.0",
     "oxlint": "^1.75.0",
+    "vercel": "^59.1.4",
     "vite": "^8.2.0",
     "vite-plugin-pwa": "^1.3.0"
   }

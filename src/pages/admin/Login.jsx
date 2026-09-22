@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import logo from "../../assets/logo.png";
-import { supabase } from "../../lib/supabase";
+import { authClient } from "../../lib/neonAuth";
 
 function Login() {
   const navigate = useNavigate();
@@ -17,24 +18,31 @@ function Login() {
     setErrorMessage("");
     setLoading(true);
 
-    const { error } =
-      await supabase.auth.signInWithPassword({
+    try {
+      const { error } = await authClient.signIn.email({
         email: email.trim(),
         password,
       });
 
-    setLoading(false);
+      if (error) {
+        setErrorMessage(
+          "Email ou palavra-passe incorretos."
+        );
+        return;
+      }
 
-    if (error) {
+      navigate("/admin/dashboard", {
+        replace: true,
+      });
+    } catch (error) {
+      console.error("Erro no login:", error);
+
       setErrorMessage(
-        "Email ou palavra-passe incorretos."
+        "Não foi possível iniciar sessão."
       );
-      return;
+    } finally {
+      setLoading(false);
     }
-
-    navigate("/admin/dashboard", {
-      replace: true,
-    });
   }
 
   return (
@@ -107,9 +115,7 @@ function Login() {
                 : "bg-[#C8A96A] text-white hover:opacity-90"
             }`}
           >
-            {loading
-              ? "A entrar..."
-              : "Entrar"}
+            {loading ? "A entrar..." : "Entrar"}
           </button>
         </form>
       </div>

@@ -49,7 +49,7 @@ function Customer() {
     setErrorMessage("");
 
     try {
-      const bookingId = await createBooking(
+      const createdBooking = await createBooking(
         {
           client_name: form.name.trim(),
           phone: form.phone.trim(),
@@ -64,7 +64,7 @@ function Customer() {
       localStorage.setItem(
         "lastBooking",
         JSON.stringify({
-          id: bookingId,
+          id: createdBooking.id,
           services: bookingDraft.services,
           date: bookingDraft.date,
           time: bookingDraft.time,

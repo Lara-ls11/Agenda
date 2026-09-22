@@ -55,4 +55,15 @@ export default defineConfig({
       },
     }),
   ],
+
+  server: {
+    proxy: {
+      "/api": {
+        target:
+          "https://agenda-beta-blush.vercel.app",
+        changeOrigin: true,
+        secure: true,
+      },
+    },
+  },
 });
