@@ -212,7 +212,7 @@ export default {
         let current = opening;
         current + totalDuration <=
         closing;
-        current += 30
+        current += 15
       ) {
         const end =
           current + totalDuration;
